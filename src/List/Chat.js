@@ -91,7 +91,11 @@ const Chat = () => {
 
         console.log(myData);
 
-        const datas = await axios.get(`https://braikou.azurewebsites.net/api/braikou?converted_body=${message}`);
+        const datas = await axios.get(`https://braikou.azurewebsites.net/api/braikou?converted_body=${message}`, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
 
         console.log(datas);
 
