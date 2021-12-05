@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { createStyles, makeStyles } from "@material-ui/core/styles";
 import { Paper, } from '@material-ui/core';
+import FormControl from '@material-ui/core/FormControl';
+import NativeSelect from '@material-ui/core/NativeSelect';
 import { MessageLeft, MessageRight } from '../components/Message';
 import SendIcon from '@material-ui/icons/Send';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import { PartnerData, myData } from '../DB/data';
+import { PartnerData, myData, UserName } from '../DB/data';
 import { Alert } from '@material-ui/lab';
-import axios from 'axios';
+import { MsgSend } from '../API/api';
+import BootstrapInput from '../components/ButtonStyles';
+
 
 const useStyles = makeStyles((theme) =>
     createStyles({
@@ -15,7 +19,7 @@ const useStyles = makeStyles((theme) =>
             maxWidth: "80%"
         },
         paper: {
-            height: '50vw',
+            height: '43vw',
             display: 'flex',
             alignItems: 'center',
             flexDirection: 'column',
@@ -56,11 +60,18 @@ const Chat = () => {
 
     const classes = useStyles();
 
+    const [partner, setPartner] = useState('山田');
+
+    const [user, setUser] = useState(PartnerData.user["山田"]);
+
     // メッセージ保持
     const [message, setMessahe] = useState("");
 
     // メッセージ状態
     const [s_input, setinput] = useState(false);
+
+    // エラー名を保持
+    const [err, setErr] = useState('');
 
     // messgae input
     const handleChangeCount = (event) => {
@@ -71,36 +82,40 @@ const Chat = () => {
     // Api送信
     const Send = async () => {
 
-        console.log('ボタンが押されました');
-        if (message === '') {
-            console.log('メッセージを入力してください');
-            setinput(true)
-            return;
+        try {
+            console.log('ボタンが押されました');
+            if (message === '') {
+                console.log('メッセージを入力してください');
+                setinput(true);
+                throw new Error('メッセージを入力してください');
+            }
+
+            console.log('メッセージが入力されました');
+
+            setMessahe('');
+
+            // messageデータをオブジェクトに格納
+            const data = {
+                msg: message
+            };
+            // massageデータをlocalデータに保存
+            myData.push(data);
+            // console.log(myData);
+
+        } catch (e) {
+            console.log(e.message);
+            setErr(e.message);
         }
-
-        console.log('メッセージが入力されました');
-
-        setMessahe('');
-
-        // messageデータをオブジェクトに格納
-        const data = {
-            msg: message
-        };
-        // massageデータをlocalデータに保存
-        myData.push(data);
-
-        console.log(myData);
-
-        const datas = await axios.get(`https://braikou.azurewebsites.net/api/braikou?converted_body=${message}`, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        });
-
-        console.log(datas);
 
     }
 
+    // チャットする相手選択
+    const HandleChangeName = (event) => {
+        console.log(event.target.value);
+        setPartner(PartnerData.user[event.target.value]);
+        setUser(PartnerData.user[event.target.value]);
+        console.log(user);
+    }
     if (s_input === true) {
         setTimeout(() => {
             setinput(false);
@@ -108,10 +123,23 @@ const Chat = () => {
     }
     return (
         <div className={classes.container}>
+            <FormControl>
+                <p className={classes.name}>チャットする相手</p>
+                <NativeSelect
+                    className="select"
+                    id="demo-customized-select-native"
+                    value={partner}
+                    onChange={HandleChangeName}
+                    input={<BootstrapInput />}
+                >
+                    <option value={'山田'}>山田</option>
+                    <option value={'田中'}>田中</option>
+                </NativeSelect>
+            </FormControl>
             <div className="frame">
                 <Paper className={classes.paper} zDepth={2} >
                     <Paper id="style-1" className={classes.messagesBody}>
-                        {PartnerData.map(i => {
+                        {user.map(i => {
                             return (
                                 <MessageLeft message={i.msg} displayName={i.name} avatarDisp={true} />
                             )
@@ -126,7 +154,7 @@ const Chat = () => {
                     {s_input &&
                         <div className={classes.wrapText}>
                             <Alert severity="error">
-                                <div>メッセージを入力してください</div>
+                                <div>{err}</div>
                             </Alert>
                         </div>
                     }

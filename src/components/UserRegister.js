@@ -1,47 +1,12 @@
 import React, { useState } from 'react';
-import { createStyles, makeStyles, withStyles } from '@material-ui/core/styles';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import Button from '@material-ui/core/Button';
-import InputBase from '@material-ui/core/InputBase';
 import { Alert } from '@material-ui/lab';
-
-const BootstrapInput = withStyles((theme) =>
-    createStyles({
-        root: {
-            'label + &': {
-                marginTop: theme.spacing(1.5),
-            },
-        },
-        input: {
-            borderRadius: 4,
-            position: 'relative',
-            backgroundColor: theme.palette.background.paper,
-            border: '1px solid #ced4da',
-            fontSize: 20,
-            padding: '10px 26px 10px 12px',
-            transition: theme.transitions.create(['border-color', 'box-shadow']),
-            // Use the system font instead of the default Roboto font.
-            fontFamily: [
-                '-apple-system',
-                'BlinkMacSystemFont',
-                '"Segoe UI"',
-                'Roboto',
-                '"Helvetica Neue"',
-                'Arial',
-                'sans-serif',
-                '"Apple Color Emoji"',
-                '"Segoe UI Emoji"',
-                '"Segoe UI Symbol"',
-            ].join(','),
-            '&:focus': {
-                borderRadius: 4,
-                borderColor: '#80bdff',
-                boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
-            },
-        },
-    }),
-)(InputBase);
+import { UserRegisters } from '../API/api';
+import { PartnerData, myData } from '../DB/data';
+import BootstrapInput from './ButtonStyles';
 
 const useStyles = makeStyles((theme) =>
     createStyles({
@@ -75,7 +40,7 @@ const useStyles = makeStyles((theme) =>
 const UserRegister = () => {
     const classes = useStyles();
 
-    const [director, setDirector] = useState('');
+    const [position, setDosition] = useState('');
 
     const [userName, setUserName] = useState('');
 
@@ -86,26 +51,45 @@ const UserRegister = () => {
     const [err, setErr] = useState('');
 
     const HandleChangeDirector = (event) => {
-        setDirector(event.target.value);
+        setDosition(event.target.value);
     }
 
     const HandleChangeUserName = (event) => {
         setUserName(event.target.value);
     };
 
-    const UserRegisterSend = () => {
+    const UserRegisterSend = async () => {
 
         try {
-            if (director === "" || userName === "") {
+            if (position === "" || userName === "") {
                 setinput(true);
-                throw new Error('役職名または名前が入力されていません')
+                throw new Error('役職名または名前が入力されていません');
             }
             const Data = {
-                director: director,
+                position: position,
                 name: userName
             };
 
-            console.log(Data);
+            // const res = await UserRegisters(Data.director, Data.name);
+
+            // if (res === null) {
+            //     setinput(true);
+            //     throw new Error('ユーザーを登録することができませんでした');
+            // }
+            // console.log(res);
+
+
+            PartnerData.user[Data.name] = [
+                {
+                    position: Data.position,
+                    name: Data.name,
+                    msg: `${Data.position}です`
+                }
+            ];
+
+            // d.push();
+
+            console.log(PartnerData);
 
         } catch (e) {
             console.log(e.message);
@@ -133,7 +117,7 @@ const UserRegister = () => {
                 <NativeSelect
                     className="select"
                     id="demo-customized-select-native"
-                    value={director}
+                    value={position}
                     onChange={HandleChangeDirector}
                     input={<BootstrapInput />}
                 >
