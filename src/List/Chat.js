@@ -106,7 +106,7 @@ const Chat = () => {
 
             // messageデータをオブジェクトに格納
             const data = {
-                msg: message
+                msg: res.data
             };
             // massageデータをlocalデータに保存
             myData.push(data);
