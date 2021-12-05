@@ -70,13 +70,13 @@ const UserRegister = () => {
                 name: userName
             };
 
-            // const res = await UserRegisters(Data.director, Data.name);
+            const res = await UserRegisters(Data.director, Data.name);
 
-            // if (res === null) {
-            //     setinput(true);
-            //     throw new Error('ユーザーを登録することができませんでした');
-            // }
-            // console.log(res);
+            if (res === null) {
+                setinput(true);
+                throw new Error('ユーザーを登録することができませんでした');
+            }
+            console.log(res);
 
 
             PartnerData.user[Data.name] = [
