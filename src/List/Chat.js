@@ -94,6 +94,16 @@ const Chat = () => {
 
             setMessahe('');
 
+
+            const res = MsgSend(message);
+    
+            console.log(res);
+
+            if (res === null) {
+                setinput(true);
+                throw new Error('データを送信できませんでした');
+            }
+
             // messageデータをオブジェクトに格納
             const data = {
                 msg: message
