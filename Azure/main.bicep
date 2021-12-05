@@ -1,37 +1,38 @@
-param webAppName string = uniqueString(resourceGroup().id) // Generate unique String for web app name
-param sku string = 'F1' // The SKU of App Service Plan
-param linuxFxVersion string = 'node|14-lts' // The runtime stack of web app
-param location string = resourceGroup().location // Location for all resources
-param repositoryUrl string = 'https://github.com/Azure-Samples/nodejs-docs-hello-world'
-param branch string = 'master'
-var appServicePlanName = toLower('AppServicePlan-${webAppName}')
-var webSiteName = toLower('wapp-${webAppName}')
-resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
-  name: appServicePlanName
-  location: location
-  properties: {
-    reserved: true
-  }
-  sku: {
-    name: sku
-  }
-  kind: 'linux'
+param environment string = 'stg'
+param location string = 'eastasia'
+param resourcePrefix string = 'azhackathon-league'
+// Parameters for static website
+param repositoryUrl string = 'https://github.com/koooota/MSAzure_HackathonLeague/'
+param repositoryBranch string = 'front_End'
+// This file operates at a subscription level
+targetScope = 'subscription'
+
+param subscriptionId string
+param kvResourceGroup string
+param kvName string
+
+// Key Vault
+resource kv 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
+  name: kvName
+  scope: resourceGroup(subscriptionId, kvResourceGroup)
 }
-resource appService 'Microsoft.Web/sites@2020-06-01' = {
-  name: webSiteName
+
+resource MainRG 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+  // name: 'rg-${resourcePrefix}-${environment}'
+  name: 'rg-${resourcePrefix}'
   location: location
-  properties: {
-    serverFarmId: appServicePlan.id
-    siteConfig: {
-      linuxFxVersion: linuxFxVersion
-    }
-  }
 }
-resource srcControls 'Microsoft.Web/sites/sourcecontrols@2021-01-01' = {
-  name: '${appService.name}/web'
-  properties: {
-    repoUrl: repositoryUrl
-    branch: branch
-    isManualIntegration: true
+
+module ModuleStaticWebsite 'static-website.bicep' = {
+  // Change deployment context to RG
+  name: 'static-website'
+  scope: resourceGroup(MainRG.name)
+  params: {
+    environment: environment
+    resourcePrefix: resourcePrefix
+    repositoryUrl: repositoryUrl
+    repositoryBranch: repositoryBranch
+    // repositoryToken: repositoryToken
+    repositoryToken: kv.getSecret('GithubPAT')
   }
 }
