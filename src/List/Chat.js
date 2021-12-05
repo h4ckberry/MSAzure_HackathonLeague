@@ -78,7 +78,6 @@ const Chat = () => {
         console.log(event.target.value);
         setMessahe(event.target.value);
     };
-
     // Api送信
     const Send = async () => {
 
